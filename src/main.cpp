@@ -319,6 +319,8 @@ void patchState() {
     return;
   }
 
+  bool updated = false;
+
   if (body["mode"].is<std::string>()) {
     auto mode = ACModeFromString(body["mode"].as<std::string>());
 
@@ -330,6 +332,7 @@ void patchState() {
     state.mode = mode;
     Serial.print("Mode: ");
     Serial.println(ACModeToString(mode));
+    updated = true;
   }
 
   if (body["temperature"].is<int>()) {
@@ -343,6 +346,7 @@ void patchState() {
     state.temperature = temperature;
     Serial.print("Temperature: ");
     Serial.println(temperature);
+    updated = true;
   }
 
   if (body["fan"].is<std::string>()) {
@@ -356,19 +360,23 @@ void patchState() {
     state.fan = fan;
     Serial.print("Fan: ");
     Serial.println(ACFanSpeedToString(fan));
+    updated = true;
   }
 
   if (body["power"].is<bool>()) {
     state.power = body["power"].as<bool>();
     Serial.print("Power: ");
     Serial.println(state.power ? "On" : "Off");
+    updated = true;
   }
 
   if (body["save"].as<bool>()) {
     saveState();
   }
   
-  sync();
+  if (updated) {
+    sync();
+  }
 
   if (body["timer"].is<int>()) {
     if (body["timer"].as<int>() < 0 || body["timer"].as<int>() > 4095) {
