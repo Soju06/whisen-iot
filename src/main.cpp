@@ -74,6 +74,7 @@ ACState           syncdState {
                   };
 float             temperatures[TMP_SAMPLES]{};
 uint32_t          lastTemperatureUpdate = 0;
+time_t            powerOffTime = 0;
 
 constexpr uint32_t STORE_ADDRESS  = 0;
 constexpr uint16_t STORE_MAGIC    = 0xACCA;
@@ -147,6 +148,27 @@ void syncSetting(bool powerOn = false) {
     syncdState.temperature  = temperature;
     syncdState.fan          = fan;
   }
+}
+
+void setTimer(uint16_t minutes) {
+  if (!syncdState.power) {
+    return;
+  }
+
+  signal(ACEvent::Timer, ACTimerData {
+    .minutes = (uint16_t)(minutes & 0xFFF),
+  }.value());
+  powerOffTime = ntpTime.getEpochTime() + minutes * 60;
+}
+
+void handleTimer() {
+  if (powerOffTime == 0 || ntpTime.getEpochTime() < powerOffTime) {
+    return;
+  }
+
+  powerOffTime = 0;
+  syncdState.power = false;
+  state.power = false;
 }
 
 void powerOn() {
@@ -289,6 +311,7 @@ void patchState() {
   // mode: "Cool" | "Dry" | "Fan" | "Heat" | "Jet"
   // temperature: number (15 - 30)
   // fan: "Fan0" | "Fan1" | "Fan2" | "Fan3" | "Fan4" | "NaturalWind"
+  // timer: number (0 - 4095)
   // save: bool
 
   if (error) {
@@ -346,8 +369,17 @@ void patchState() {
   }
   
   sync();
+
+  if (body["timer"].is<int>()) {
+    if (body["timer"].as<int>() < 0 || body["timer"].as<int>() > 4095) {
+      sendBadRequest("Invalid timer. Must be between 0 and 4095");
+      return;
+    }
+    setTimer(body["timer"].as<int>());
+  }
   
   JsonDocument resp;
+
 
   stateJsonObject(resp["state"].to<JsonObject>());
   resp["status"] = "ok";
@@ -440,4 +472,5 @@ void loop() {
   ntpTime.update();
   server.handleClient();
   updateTemperature();
+  handleTimer();
 }
