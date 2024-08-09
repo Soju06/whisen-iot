@@ -152,13 +152,15 @@ void syncSetting(bool powerOn = false) {
 
 void setTimer(uint16_t minutes) {
   if (!syncdState.power) {
+    powerOffTime = 0;
     return;
   }
 
   signal(ACEvent::Timer, ACTimerData {
     .minutes = (uint16_t)(minutes & 0xFFF),
   }.value());
-  powerOffTime = ntpTime.getEpochTime() + minutes * 60;
+  
+  powerOffTime = minutes ? ntpTime.getEpochTime() + minutes * 60 : 0;
 }
 
 void handleTimer() {
@@ -383,6 +385,7 @@ void patchState() {
       sendBadRequest("Invalid timer. Must be between 0 and 4095");
       return;
     }
+    
     setTimer(body["timer"].as<int>());
   }
   
