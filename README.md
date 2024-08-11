@@ -36,10 +36,15 @@ LG Whisen 에어컨 IR원격 IOT
 <img src="https://github.com/user-attachments/assets/76db7d50-0e97-4c0d-a2ce-7dda0e3acc5f" align="center" width="32%">
 
 1. [Whisen 제어](https://www.icloud.com/shortcuts/0e0be05ac42d4c2d922b8386ec511a6c) 단축어를 추가합니다.
+   
 2. 단축어 수정에서 첫 번째 텍스트를 자신의 ESP8266 IP로 수정합니다.
+   
    <img src="https://github.com/user-attachments/assets/537c1d1d-8646-47dc-a3bf-edab5ce971fa" align="center" width="32%">
+
 3. 본인이 설정한 `HTTP_USERNAME`과 `HTTP_PASSWORD`를 `{HTTP_USERNAME}:{HTTP_PASSWORD}` 형식으로 두 번째 텍스트에 입력합니다.
+   
    <img src="https://github.com/user-attachments/assets/b59f86f8-e595-4cec-b094-10cfbba2589e" align="center" width="32%">
+
 4. 단축어를 실행하여 정상적으로 API가 호출되는지 확인합니다.
 
 ### API
